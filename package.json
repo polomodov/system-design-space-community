@@ -1,0 +1,21 @@
+{
+  "name": "system-design-space-community",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test scripts/*.test.mjs",
+    "check:labs:manifests": "node scripts/check-labs.mjs --validate-only",
+    "check:labs": "node scripts/check-labs.mjs --require-runtime",
+    "package:release": "node scripts/package-release.mjs",
+    "audit:layout": "node audits/run-layout.mjs",
+    "audit:links": "node audits/run-links.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
+  }
+}

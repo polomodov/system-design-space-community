@@ -1,0 +1,15 @@
+groups:
+  - name: solution-multi-window-burn-rate
+    rules:
+      - alert: SLOMultiWindowBurnRate
+        expr: >-
+          ((sum(rate(lab_http_requests_total{status="500"}[5s]))
+          / sum(rate(lab_http_requests_total[5s]))) / 0.001 > 14)
+          and
+          ((sum(rate(lab_http_requests_total{status="500"}[10s]))
+          / sum(rate(lab_http_requests_total[10s]))) / 0.001 > 14)
+        labels:
+          severity: page
+          slo: "99.9"
+        annotations:
+          summary: Fast and sustained windows both burn the error budget too quickly

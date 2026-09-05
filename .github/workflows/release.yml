@@ -1,0 +1,57 @@
+name: Release labs
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: New release version (vX.Y.Z)
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: release-labs
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run check:labs
+      - name: Package reviewed commit
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: npm run package:release -- "$RELEASE_VERSION"
+      - name: Verify archives outside checkout
+        run: node scripts/verify-release.mjs release --runtime
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: lab-release
+          path: release/
+          retention-days: 7
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: lab-release
+          path: release
+      - name: Publish validated version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_VERSION: ${{ inputs.version }}
+          RELEASE_COMMIT: ${{ github.sha }}
+        run: |
+          test "$(gh api "repos/$GH_REPO/branches/main" --jq .commit.sha)" = "$RELEASE_COMMIT"
+          gh release create "$RELEASE_VERSION" release/* --target "$RELEASE_COMMIT" --title "Labs $RELEASE_VERSION" --notes "Verified Docker labs with bilingual instructions. Download a workspace archive and verify SHA256SUMS."

@@ -1,0 +1,48 @@
+name: sds-slo-burn-rate-incident
+
+services:
+  metrics:
+    image: python:3.13.5-alpine3.22
+    command: ["python", "/workspace/metrics_server.py"]
+    environment:
+      LAB_MODE_PATH: /state/mode
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - ./starter/metrics_server.py:/workspace/metrics_server.py:ro
+      - ./scripts/check_metrics.py:/workspace/check_metrics.py:ro
+      - ./.state:/state:ro
+    networks:
+      - lab-network
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    depends_on:
+      metrics:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9090/-/ready >/dev/null 2>&1"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - ./.state/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./.state/prometheus.rules.yml:/etc/prometheus/prometheus.rules.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - lab-network
+
+networks:
+  lab-network:
+    name: sds-slo-burn-rate-incident-network
+
+volumes:
+  prometheus-data:
+    name: sds-slo-burn-rate-incident-data

@@ -1,0 +1,9 @@
+groups:
+  - name: starter-single-window
+    rules:
+      - alert: SingleWindowHighErrorRate
+        expr: sum(rate(lab_http_requests_total{status="500"}[5s])) / sum(rate(lab_http_requests_total[5s])) > 0.01
+        labels:
+          severity: page
+        annotations:
+          summary: A noisy single-window threshold without error-budget context

@@ -1,0 +1,9 @@
+node_modules/
+release/
+reports/
+playwright-report/
+test-results/
+.audit-cache/
+.env*
+.DS_Store
+__pycache__/

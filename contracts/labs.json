@@ -1,0 +1,67 @@
+[
+  {
+    "id": "kafka-rebalance-backpressure",
+    "project": "sds-kafka-rebalance-backpressure",
+    "images": [
+      "apache/kafka:4.0.0"
+    ],
+    "services": [
+      "kafka",
+      "consumer-a",
+      "consumer-b"
+    ],
+    "starterFiles": [
+      "consumer.properties"
+    ],
+    "solutionFiles": [
+      "consumer.properties"
+    ],
+    "checkIds": [
+      "lag-recovers"
+    ]
+  },
+  {
+    "id": "retry-storm-outbox",
+    "project": "sds-retry-storm-outbox",
+    "images": [
+      "postgres:17.5-alpine3.21"
+    ],
+    "services": [
+      "db",
+      "runner"
+    ],
+    "starterFiles": [
+      "schema.sql",
+      "inject-failure.sql"
+    ],
+    "solutionFiles": [
+      "apply.sql"
+    ],
+    "checkIds": [
+      "duplicates-suppressed"
+    ]
+  },
+  {
+    "id": "slo-burn-rate-incident",
+    "project": "sds-slo-burn-rate-incident",
+    "images": [
+      "python:3.13.5-alpine3.22",
+      "prom/prometheus:v3.5.0"
+    ],
+    "services": [
+      "metrics",
+      "prometheus"
+    ],
+    "starterFiles": [
+      "metrics_server.py",
+      "prometheus.yml",
+      "prometheus.rules.yml"
+    ],
+    "solutionFiles": [
+      "prometheus.rules.yml"
+    ],
+    "checkIds": [
+      "multi-window-alert-fires"
+    ]
+  }
+]
