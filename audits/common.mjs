@@ -37,6 +37,16 @@ export async function waitForClientReady(page) {
   await page.waitForFunction(() => window.__SDS_ROUTE_READY__ === true && window.__SDS_GLOBAL_SEARCH_READY__ === true && [...document.querySelectorAll('[data-playground-shell]')].every(node => node.getAttribute('data-interactive') === 'true'), null, { timeout: 15000 });
   await page.evaluate(async () => { await document.fonts.ready; await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))); });
 }
+export async function settleAnimations(page) {
+  await page.evaluate(async () => {
+    const animations = document.getAnimations().filter(animation => {
+      const timing = animation.effect?.getComputedTiming();
+      return timing && Number.isFinite(timing.endTime) && timing.endTime <= 2000;
+    });
+    await Promise.all(animations.map(animation => animation.finished.catch(() => {})));
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  });
+}
 export async function openPublicPage(page, route) {
   const response = await page.goto(publicRoute(route).href, { waitUntil: 'domcontentloaded', timeout: 30000 });
   if (!response?.ok()) throw new Error(`Page HTTP ${response?.status()}: ${route}`);

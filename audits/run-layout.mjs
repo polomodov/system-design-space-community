@@ -12,7 +12,7 @@ try {
   const selected = route => !filter || filter.includes(route.replace(/\/$/, '') || '/');
   const profiles = layoutViewportProfiles.filter(x => !process.env.LAYOUT_VIEWPORT || x.id === process.env.LAYOUT_VIEWPORT);
   if (!profiles.length) throw new Error('Unknown LAYOUT_VIEWPORT');
-  const checks = profiles.flatMap(profile => before.layoutRoutes.filter(route => selected(route.path)).map(route => ({ kind: 'layout', route, profile })));
+  const checks = process.env.AUDIT_KIND === 'svg' ? [] : profiles.flatMap(profile => before.layoutRoutes.filter(route => selected(route.path)).map(route => ({ kind: 'layout', route, profile })));
   if (!process.env.LAYOUT_VIEWPORT || process.env.LAYOUT_VIEWPORT === 'desktop') checks.push(...before.svgRoutes.filter(selected).map(path => ({ kind: 'svg', route: {path}, profile: layoutViewportProfiles.find(x=>x.id==='desktop') })));
   if (!checks.length) throw new Error('No matching audit routes');
   browser = await chromium.launch();

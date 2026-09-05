@@ -33,3 +33,5 @@ Node 24: `npm ci`, `npm test`, `npm run check:labs:manifests`, `npm run check:la
 ## Публичный аудит
 
 `AUDIT_SITE_URL=https://system-design.space/ npm run audit:layout` и `npm run audit:links` проверяют публичные страницы. Для локального preview укажите его URL. Аудит читает `data/site-audit.v1.json`, ждёт интерактивности и проверяет идентичность публикации до/после. Отчёты в `reports/`; смена публикации означает incomplete. Недельные аудиты не являются обязательной проверкой публикации сайта.
+
+При проверке скачанного релиза с Colima укажите `TMPDIR` внутри каталога, смонтированного в Docker (например, `$HOME/.cache/sds-lab-verification`), чтобы bind mounts временно распакованных стендов были доступны. Проверки самих аудиторов: `npm run test:audits` (после `npx playwright install chromium`).

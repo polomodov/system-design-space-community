@@ -1,4 +1,4 @@
-import { openPublicPage } from "./common.mjs";
+import { openPublicPage, settleAnimations } from "./common.mjs";
 
 // Target scrollWidth can drift by a few pixels from subpixel rounding.
 // Document overflow and visible offenders still fail the audit.
@@ -93,6 +93,7 @@ export const openRouteForLayoutAudit = async (
 ) => {
   await openPublicPage(page, route.path);
   await waitForReadyMarker(page, route);
+  await settleAnimations(page);
 
   await page.evaluate(async () => {
     if (document.fonts?.ready) {

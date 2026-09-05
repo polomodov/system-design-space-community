@@ -13,7 +13,8 @@
     "check:labs": "node scripts/check-labs.mjs --require-runtime",
     "package:release": "node scripts/package-release.mjs",
     "audit:layout": "node audits/run-layout.mjs",
-    "audit:links": "node audits/run-links.mjs"
+    "audit:links": "node audits/run-links.mjs",
+    "test:audits": "playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1"

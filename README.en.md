@@ -33,3 +33,5 @@ Node 24: `npm ci`, `npm test`, `npm run check:labs:manifests`, `npm run check:la
 ## Public audit
 
 `AUDIT_SITE_URL=https://system-design.space/ npm run audit:layout` and `npm run audit:links` inspect public pages; use a local preview URL for local QA. Auditors read data/site-audit.v1.json, wait for interactivity and compare publication identity before/after. Reports live in reports/. A changed publication yields incomplete. Weekly audits are not required site deployment gates.
+
+When verifying downloaded releases with Colima, set `TMPDIR` to a directory mounted into Docker (for example, `$HOME/.cache/sds-lab-verification`) so extracted bind mounts are accessible. Auditor tests: `npm run test:audits` (after `npx playwright install chromium`).
