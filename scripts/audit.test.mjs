@@ -17,3 +17,13 @@ test('changed or unreadable publication overrides both success and failure',()=>
   assert.equal(finishStatus(before,{...before,publicationId:'b'.repeat(64)},false),'incomplete');
   assert.equal(finishStatus(before,null,true),'incomplete');
 });
+
+// New public browser entry points must not omit context isolation.
+for (const file of ['run-layout.mjs','run-links.mjs']) {
+  test(`public auditor ${file} uses isolated context creation`, async () => {
+    const {readFile} = await import('node:fs/promises');
+    const source=await readFile(new URL(`../audits/${file}`,import.meta.url),'utf8');
+    assert.ok(source.includes('createAuditContext(browser,'));
+    assert.ok(!source.includes('browser.newContext('));
+  });
+}

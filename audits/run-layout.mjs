@@ -1,5 +1,5 @@
 import { chromium } from '@playwright/test';
-import { fetchManifest, finishStatus, openPublicPage, pooled, writeAuditReport } from './common.mjs';
+import { createAuditContext, fetchManifest, finishStatus, openPublicPage, pooled, writeAuditReport } from './common.mjs';
 import { layoutViewportProfiles, openRouteForLayoutAudit, runLayoutAudit } from './layout.mjs';
 import { collectLabelSpills } from './svg.mjs';
 
@@ -17,7 +17,7 @@ try {
   if (!checks.length) throw new Error('No matching audit routes');
   browser = await chromium.launch();
   report.results = await pooled(checks, async ({kind,route,profile}) => {
-    const context = await browser.newContext({ viewport: {width:profile.width,height:profile.height}, deviceScaleFactor:profile.deviceScaleFactor, isMobile:profile.isMobile, hasTouch:profile.hasTouch, serviceWorkers:'block', reducedMotion:'reduce' });
+    const context = await createAuditContext(browser,{ viewport: {width:profile.width,height:profile.height}, deviceScaleFactor:profile.deviceScaleFactor, isMobile:profile.isMobile, hasTouch:profile.hasTouch, serviceWorkers:'block', reducedMotion:'reduce' });
     const page = await context.newPage();
     page.setDefaultTimeout(15000);
     try {

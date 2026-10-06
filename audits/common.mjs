@@ -69,3 +69,30 @@ export async function writeAuditReport(name, report) {
   await writeFile(`reports/${name}.json`, JSON.stringify(report, null, 2)+'\n');
   await writeFile(`reports/${name}.md`, `# ${name}\n\nStatus: ${report.status}\n\nPublication: ${report.publicationId ?? 'unavailable'}\n\nChecks: ${report.results?.length ?? 0}\n\n` + (report.errors ?? []).map(error => `- ${String(error).replace(/[\r\n]+/g,' ')}\n`).join(''));
 }
+
+/** Public-site browsers may fetch the audited origin, but never execute external tags. */
+export async function createAuditContext(browser, options = {}, base = siteUrl()) {
+  const context = await browser.newContext({ ...options, serviceWorkers: 'block' });
+  try {
+    await context.route('**/*', route => {
+      if (new URL(route.request().url()).origin === base.origin) return route.fallback();
+      const kind = route.request().resourceType();
+      return route.fulfill({
+        status: kind === 'script' || kind === 'document' ? 200 : 204,
+        contentType: kind === 'script' ? 'application/javascript' : 'text/html',
+        headers: { 'access-control-allow-origin': '*' },
+        body: '',
+      });
+    });
+    await context.routeWebSocket('**/*', socket => {
+      const url = new URL(socket.url());
+      url.protocol = url.protocol === 'wss:' ? 'https:' : 'http:';
+      if (url.origin === base.origin) socket.connectToServer();
+      else socket.close();
+    });
+    return context;
+  } catch (error) {
+    await context.close();
+    throw error;
+  }
+}
