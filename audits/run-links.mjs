@@ -1,6 +1,6 @@
 import { chromium } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
-import { fetchManifest, finishStatus, openPublicPage, pooled, siteUrl, writeAuditReport } from './common.mjs';
+import { createAuditContext, fetchManifest, finishStatus, openPublicPage, pooled, siteUrl, writeAuditReport } from './common.mjs';
 import { probe } from './probe.mjs';
 
 const report = {status:'incomplete',publicationId:null,results:[],errors:[],pages:[]};
@@ -15,7 +15,7 @@ try {
   if(!routes.length) throw new Error('No matching audit routes');
   browser=await chromium.launch();
   const pages=await pooled(routes,async path=>{
-    const context=await browser.newContext({serviceWorkers:'block',reducedMotion:'reduce'});
+    const context=await createAuditContext(browser,{serviceWorkers:'block',reducedMotion:'reduce'});
     try {
       const page=await context.newPage();
       await openPublicPage(page,path);
